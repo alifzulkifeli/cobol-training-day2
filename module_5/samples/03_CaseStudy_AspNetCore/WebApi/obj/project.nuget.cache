@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/MBZV/XM+MHNKTUI7NfKn8wjNPpJnHF6HPqHiRlJ14NQ/pkQG3iJAQIuZcXVLgiRa4z1hh4PJxQngIY7amYcAg==",
+  "dgSpecHash": "QKQfy7zx/gWjYRUtn2UER42xazIKSKygWDnO86AboazVWKHlxw/5pw8Ox4H5tT97/T9RbwgiA9k9xgyvUD5ncw==",
   "success": true,
-  "projectFilePath": "/home/wesi/codes/cobol-training/module_5/samples/03_CaseStudy_AspNetCore/WebApi/WebApi.csproj",
+  "projectFilePath": "/home/trainees/cobol/cobol-training-day2/module_5/samples/03_CaseStudy_AspNetCore/WebApi/WebApi.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

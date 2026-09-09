@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "F5Z9WNXvxtFpJfOOY6A2QWgkVcNunfWgHwI9wQLu6OvSGlxmsAqv1bvH6a5i7RQFt2BoARZht1ypZEeLo5v5QA==",
+  "dgSpecHash": "/1ZeqRPrBnj+W49ZtuzyhZRpezq2JXE/juRObyNbFR95svASTRcrFRnQ2Y1D/rpSDR3TkC9/GYw0hgk9pHQF0A==",
   "success": true,
-  "projectFilePath": "/home/wesi/codes/cobol-training/module_5/exercises/exercise_1_csharp_to_cobol_interop/solution/ECommerceCheckout.csproj",
+  "projectFilePath": "/home/trainees/cobol/cobol-training-day2/module_5/exercises/exercise_1_csharp_to_cobol_interop/solution/ECommerceCheckout.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

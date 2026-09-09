@@ -8,19 +8,19 @@
     "net8.0": []
   },
   "packageFolders": {
-    "/home/wesi/.nuget/packages/": {}
+    "/home/trainees/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/wesi/codes/cobol-training/module_5/exercises/exercise_1_csharp_to_cobol_interop/solution/ECommerceCheckout.csproj",
+      "projectUniqueName": "/home/trainees/cobol/cobol-training-day2/module_5/exercises/exercise_1_csharp_to_cobol_interop/solution/ECommerceCheckout.csproj",
       "projectName": "ECommerceCheckout",
-      "projectPath": "/home/wesi/codes/cobol-training/module_5/exercises/exercise_1_csharp_to_cobol_interop/solution/ECommerceCheckout.csproj",
-      "packagesPath": "/home/wesi/.nuget/packages/",
-      "outputPath": "/home/wesi/codes/cobol-training/module_5/exercises/exercise_1_csharp_to_cobol_interop/solution/obj/",
+      "projectPath": "/home/trainees/cobol/cobol-training-day2/module_5/exercises/exercise_1_csharp_to_cobol_interop/solution/ECommerceCheckout.csproj",
+      "packagesPath": "/home/trainees/.nuget/packages/",
+      "outputPath": "/home/trainees/cobol/cobol-training-day2/module_5/exercises/exercise_1_csharp_to_cobol_interop/solution/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/wesi/.nuget/NuGet/NuGet.Config"
+        "/home/trainees/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"

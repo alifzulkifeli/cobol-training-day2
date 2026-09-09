@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/wesi/codes/cobol-training/module_5/samples/02_CSharpCallsCobol/DotNetClient/DotNetClient.csproj": {}
+    "/home/trainees/cobol/cobol-training-day2/module_5/samples/02_CSharpCallsCobol/DotNetClient/DotNetClient.csproj": {}
   },
   "projects": {
-    "/home/wesi/codes/cobol-training/module_5/samples/02_CSharpCallsCobol/DotNetClient/DotNetClient.csproj": {
+    "/home/trainees/cobol/cobol-training-day2/module_5/samples/02_CSharpCallsCobol/DotNetClient/DotNetClient.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/wesi/codes/cobol-training/module_5/samples/02_CSharpCallsCobol/DotNetClient/DotNetClient.csproj",
+        "projectUniqueName": "/home/trainees/cobol/cobol-training-day2/module_5/samples/02_CSharpCallsCobol/DotNetClient/DotNetClient.csproj",
         "projectName": "DotNetClient",
-        "projectPath": "/home/wesi/codes/cobol-training/module_5/samples/02_CSharpCallsCobol/DotNetClient/DotNetClient.csproj",
-        "packagesPath": "/home/wesi/.nuget/packages/",
-        "outputPath": "/home/wesi/codes/cobol-training/module_5/samples/02_CSharpCallsCobol/DotNetClient/obj/",
+        "projectPath": "/home/trainees/cobol/cobol-training-day2/module_5/samples/02_CSharpCallsCobol/DotNetClient/DotNetClient.csproj",
+        "packagesPath": "/home/trainees/.nuget/packages/",
+        "outputPath": "/home/trainees/cobol/cobol-training-day2/module_5/samples/02_CSharpCallsCobol/DotNetClient/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/wesi/.nuget/NuGet/NuGet.Config"
+          "/home/trainees/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/wesi/codes/cobol-training/module_5/samples/01_CobolCallsCSharp/CSharpLib/CSharpLib.csproj": {}
+    "/home/trainees/cobol/cobol-training-day2/module_5/samples/01_CobolCallsCSharp/CSharpLib/CSharpLib.csproj": {}
   },
   "projects": {
-    "/home/wesi/codes/cobol-training/module_5/samples/01_CobolCallsCSharp/CSharpLib/CSharpLib.csproj": {
+    "/home/trainees/cobol/cobol-training-day2/module_5/samples/01_CobolCallsCSharp/CSharpLib/CSharpLib.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/wesi/codes/cobol-training/module_5/samples/01_CobolCallsCSharp/CSharpLib/CSharpLib.csproj",
+        "projectUniqueName": "/home/trainees/cobol/cobol-training-day2/module_5/samples/01_CobolCallsCSharp/CSharpLib/CSharpLib.csproj",
         "projectName": "CSharpLib",
-        "projectPath": "/home/wesi/codes/cobol-training/module_5/samples/01_CobolCallsCSharp/CSharpLib/CSharpLib.csproj",
-        "packagesPath": "/home/wesi/.nuget/packages/",
-        "outputPath": "/home/wesi/codes/cobol-training/module_5/samples/01_CobolCallsCSharp/CSharpLib/obj/",
+        "projectPath": "/home/trainees/cobol/cobol-training-day2/module_5/samples/01_CobolCallsCSharp/CSharpLib/CSharpLib.csproj",
+        "packagesPath": "/home/trainees/.nuget/packages/",
+        "outputPath": "/home/trainees/cobol/cobol-training-day2/module_5/samples/01_CobolCallsCSharp/CSharpLib/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/wesi/.nuget/NuGet/NuGet.Config"
+          "/home/trainees/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"

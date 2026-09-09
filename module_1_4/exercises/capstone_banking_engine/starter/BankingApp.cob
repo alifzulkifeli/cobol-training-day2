@@ -142,30 +142,52 @@
         2500-SEED-ACCOUNTS.
             DISPLAY "[INFO] Seeding initial customer accounts in atomic transaction..." END-DISPLAY
 
-           *>------------------------------------------------------------------*
-           *> TODO 1: Wrap initial seed inserts inside an atomic SQLite        *
-           *>         transaction (BEGIN TRANSACTION / COMMIT).                *
-           *>         If any insert fails, PERFORM 2900-ROLLBACK-AND-ABORT.    *
-           *>------------------------------------------------------------------*
-
-           *> >>> YOUR CODE HERE: BEGIN TRANSACTION <<<
+            MOVE "BEGIN TRANSACTION;" TO SQL-STATEMENT
+            CALL "cob_sqlite_exec" USING
+                BY REFERENCE DB-HANDLE
+                BY REFERENCE SQL-STATEMENT
+                BY REFERENCE SQLITE-STATUS
+            END-CALL
+            IF NOT SQL-OK
+                DISPLAY "[ERROR] Failed starting seed transaction: " SQLITE-STATUS END-DISPLAY
+                PERFORM 5000-CLEANUP
+                MOVE 1 TO RETURN-CODE
+                STOP RUN
+            END-IF
 
             MOVE "INSERT INTO accounts VALUES (1001, 'Alice Jenkins', 'CHECKING', 9500.00, 'ACTIVE');"
                 TO SQL-STATEMENT
             CALL "cob_sqlite_exec" USING BY REFERENCE DB-HANDLE BY REFERENCE SQL-STATEMENT BY REFERENCE SQLITE-STATUS
             END-CALL
+            IF NOT SQL-OK
+                PERFORM 2900-ROLLBACK-AND-ABORT
+            END-IF
 
             MOVE "INSERT INTO accounts VALUES (1002, 'Bob Rodriguez', 'SAVINGS', 2500.00, 'ACTIVE');"
                 TO SQL-STATEMENT
             CALL "cob_sqlite_exec" USING BY REFERENCE DB-HANDLE BY REFERENCE SQL-STATEMENT BY REFERENCE SQLITE-STATUS
             END-CALL
+            IF NOT SQL-OK
+                PERFORM 2900-ROLLBACK-AND-ABORT
+            END-IF
 
             MOVE "INSERT INTO accounts VALUES (1003, 'Acme Corp Enterprise', 'CORPORATE', 150000.00, 'ACTIVE');"
                 TO SQL-STATEMENT
             CALL "cob_sqlite_exec" USING BY REFERENCE DB-HANDLE BY REFERENCE SQL-STATEMENT BY REFERENCE SQLITE-STATUS
             END-CALL
+            IF NOT SQL-OK
+                PERFORM 2900-ROLLBACK-AND-ABORT
+            END-IF
 
-           *> >>> YOUR CODE HERE: COMMIT TRANSACTION & ERROR CHECKING <<<
+            MOVE "COMMIT;" TO SQL-STATEMENT
+            CALL "cob_sqlite_exec" USING
+                BY REFERENCE DB-HANDLE
+                BY REFERENCE SQL-STATEMENT
+                BY REFERENCE SQLITE-STATUS
+            END-CALL
+            IF NOT SQL-OK
+                PERFORM 2900-ROLLBACK-AND-ABORT
+            END-IF
 
             DISPLAY "[INFO] 3 master accounts seeded." END-DISPLAY
             DISPLAY " " END-DISPLAY.
@@ -222,14 +244,7 @@
 
         3500-PROCESS-BATCH-TXNS.
             DISPLAY "[INFO] Processing batch transactions with ACID verification..." END-DISPLAY
-
-           *>------------------------------------------------------------------*
-           *> TODO 2: Traverse BATCH-TRANSACTION-TABLE using the hardware index*
-           *>         TXN-IDX (Module 4 optimization). Loop from 1 to 5.       *
-           *>------------------------------------------------------------------*
-
-           *> >>> YOUR CODE HERE: PERFORM 3600-EXECUTE-SINGLE-TXN ... <<<
-
+            PERFORM 3600-EXECUTE-SINGLE-TXN VARYING TXN-IDX FROM 1 BY 1 UNTIL TXN-IDX > 5
             DISPLAY "[INFO] Batch transaction processing completed." END-DISPLAY
             DISPLAY " " END-DISPLAY.
 
@@ -247,19 +262,50 @@
                 EXIT PARAGRAPH
             END-IF
 
-           *>------------------------------------------------------------------*
-           *> TODO 3: Resilient Balance Calculation & Overdraft Defense:       *
-           *>   - For CREDIT: Add B-AMOUNT to LK-BALANCE-DEC with ON SIZE ERROR*
-           *>   - For DEBIT: Check LK-BALANCE-DEC >= B-AMOUNT.                 *
-           *>     If insufficient: Display rejection and ADD 1 TO WS-TXN-REJECT*
-           *>     If sufficient: Subtract with ON SIZE ERROR                   *
-           *>   - If arithmetic overflow occurs: Display error & reject.       *
-           *>   - If valid: PERFORM 3800-COMMIT-TXN-UPDATE                     *
-           *>------------------------------------------------------------------*
+           *> 2. Evaluate business rules & perform calculations
+            MOVE B-AMOUNT (TXN-IDX) TO DISP-AMOUNT
+            MOVE B-TXN-ID (TXN-IDX) TO STR-TXN-ID
+            MOVE B-ACC-ID (TXN-IDX) TO STR-ACC-ID
 
-           *> >>> YOUR CODE HERE: IMPLEMENT CREDIT/DEBIT LOGIC & SAFETY <<<
+            IF B-TYPE (TXN-IDX) = "CREDIT"
+                MOVE "N" TO WS-CALC-OVERFLOW
+                ADD B-AMOUNT (TXN-IDX) TO LK-BALANCE-DEC GIVING WS-NEW-BALANCE
+                    ON SIZE ERROR
+                        MOVE "Y" TO WS-CALC-OVERFLOW
+                END-ADD
 
-            .
+                IF WS-CALC-OVERFLOW = "Y"
+                    DISPLAY "  [TXN " STR-TXN-ID "] REJECTED: Arithmetic capacity overflow!" END-DISPLAY
+                    ADD 1 TO WS-TXN-REJECTED END-ADD
+                    EXIT PARAGRAPH
+                END-IF
+
+                PERFORM 3800-COMMIT-TXN-UPDATE
+            ELSE
+                IF B-TYPE (TXN-IDX) = "DEBIT"
+                    IF LK-BALANCE-DEC < B-AMOUNT (TXN-IDX)
+                        DISPLAY "  [TXN " STR-TXN-ID "] DEBIT  " DISP-AMOUNT 
+                                " from Acc " STR-ACC-ID 
+                                " -> REJECTED: Insufficient Funds (Overdraft Blocked)" END-DISPLAY
+                        ADD 1 TO WS-TXN-REJECTED END-ADD
+                        EXIT PARAGRAPH
+                    END-IF
+
+                    MOVE "N" TO WS-CALC-OVERFLOW
+                    SUBTRACT B-AMOUNT (TXN-IDX) FROM LK-BALANCE-DEC GIVING WS-NEW-BALANCE
+                        ON SIZE ERROR
+                            MOVE "Y" TO WS-CALC-OVERFLOW
+                    END-SUBTRACT
+
+                    IF WS-CALC-OVERFLOW = "Y"
+                        DISPLAY "  [TXN " STR-TXN-ID "] REJECTED: Arithmetic capacity overflow!" END-DISPLAY
+                        ADD 1 TO WS-TXN-REJECTED END-ADD
+                        EXIT PARAGRAPH
+                    END-IF
+
+                    PERFORM 3800-COMMIT-TXN-UPDATE
+                END-IF
+            END-IF.
 
         3700-LOOKUP-ACCOUNT-BALANCE.
             MOVE "N" TO LK-FOUND
@@ -356,19 +402,100 @@
             DISPLAY "ACCOUNT ID | HOLDER NAME               | TYPE         | CURRENT BALANCE | STATUS     " END-DISPLAY
             DISPLAY "-------------------------------------------------------------------------------------" END-DISPLAY
 
-           *>------------------------------------------------------------------*
-           *> TODO 4: Prepare the cursor query:                                *
-           *>         SELECT account_id, holder_name, account_type, balance,   *
-           *>                status FROM accounts ORDER BY account_id;         *
-           *>         Loop through cursor using cob_sqlite_step (SQL-ROW),     *
-           *>         extract columns into Q-ACC-ID, Q-HOLDER-NAME, etc.,      *
-           *>         accumulate total bank assets, and display each row.      *
-           *>         Finalize statement with cob_sqlite_finalize.             *
-           *>------------------------------------------------------------------*
+            MOVE "SELECT account_id, holder_name, account_type, balance, status FROM accounts ORDER BY account_id;"
+                TO SQL-STATEMENT
+            CALL "cob_sqlite_prepare" USING
+                BY REFERENCE DB-HANDLE
+                BY REFERENCE SQL-STATEMENT
+                BY REFERENCE STMT-HANDLE
+                BY REFERENCE SQLITE-STATUS
+            END-CALL
 
-           *> >>> YOUR CODE HERE: CURSOR QUERY, LOOP & AGGREGATION <<<
+            IF NOT SQL-OK
+                DISPLAY "[ERROR] Cursor preparation failed: " SQLITE-STATUS END-DISPLAY
+                PERFORM 5000-CLEANUP
+                MOVE 1 TO RETURN-CODE
+                STOP RUN
+            END-IF
+
+            PERFORM FOREVER
+                CALL "cob_sqlite_step" USING
+                    BY REFERENCE STMT-HANDLE
+                    BY REFERENCE SQLITE-STATUS
+                END-CALL
+
+                IF SQL-ROW
+                    CALL "cob_sqlite_get_int" USING
+                        BY REFERENCE STMT-HANDLE
+                        BY VALUE 0
+                        BY REFERENCE Q-ACC-ID
+                    END-CALL
+
+                    CALL "cob_sqlite_get_text" USING
+                        BY REFERENCE STMT-HANDLE
+                        BY VALUE 1
+                        BY REFERENCE Q-HOLDER-NAME
+                        BY VALUE 25
+                    END-CALL
+
+                    CALL "cob_sqlite_get_text" USING
+                        BY REFERENCE STMT-HANDLE
+                        BY VALUE 2
+                        BY REFERENCE Q-ACC-TYPE
+                        BY VALUE 12
+                    END-CALL
+
+                    CALL "cob_sqlite_get_double" USING
+                        BY REFERENCE STMT-HANDLE
+                        BY VALUE 3
+                        BY REFERENCE Q-ACC-BAL-DBL
+                    END-CALL
+
+                    CALL "cob_sqlite_get_text" USING
+                        BY REFERENCE STMT-HANDLE
+                        BY VALUE 4
+                        BY REFERENCE Q-ACC-STATUS
+                        BY VALUE 10
+                    END-CALL
+
+                    COMPUTE Q-ACC-BAL-DEC ROUNDED = Q-ACC-BAL-DBL END-COMPUTE
+                    ADD 1 TO WS-ACC-COUNT END-ADD
+                    ADD Q-ACC-BAL-DEC TO WS-TOTAL-ASSETS END-ADD
+
+                    MOVE Q-ACC-ID TO DISP-ACC-ID
+                    MOVE Q-ACC-BAL-DEC TO DISP-BALANCE
+                    DISPLAY DISP-ACC-ID " | " Q-HOLDER-NAME " | " Q-ACC-TYPE " | " DISP-BALANCE " | " Q-ACC-STATUS
+                    END-DISPLAY
+                ELSE
+                    IF NOT SQL-DONE
+                        DISPLAY "[ERROR] Cursor error during fetch: " SQLITE-STATUS END-DISPLAY
+                        CALL "cob_sqlite_finalize" USING
+                            BY REFERENCE STMT-HANDLE
+                            BY REFERENCE SQLITE-STATUS
+                        END-CALL
+                        PERFORM 5000-CLEANUP
+                        MOVE 1 TO RETURN-CODE
+                        STOP RUN
+                    END-IF
+                    EXIT PERFORM
+                END-IF
+            END-PERFORM
+
+            CALL "cob_sqlite_finalize" USING
+                BY REFERENCE STMT-HANDLE
+                BY REFERENCE SQLITE-STATUS
+            END-CALL
+
+            MOVE WS-ACC-COUNT TO DISP-COUNT
+            MOVE WS-TOTAL-ASSETS TO DISP-TOTAL-ASSETS
 
             DISPLAY "-------------------------------------------------------------------------------------" END-DISPLAY
+            DISPLAY "Total Accounts Active : " DISP-COUNT END-DISPLAY
+            DISPLAY "Total Ledger Assets   : " DISP-TOTAL-ASSETS END-DISPLAY
+            MOVE WS-TXN-SUCCESS TO DISP-COUNT
+            DISPLAY "Processed Moves Count : " DISP-COUNT END-DISPLAY
+            MOVE WS-TXN-REJECTED TO DISP-COUNT
+            DISPLAY "Rejected Moves Count  : " DISP-COUNT END-DISPLAY
             DISPLAY " " END-DISPLAY.
 
         5000-CLEANUP.
